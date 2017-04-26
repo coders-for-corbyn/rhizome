@@ -57,17 +57,14 @@ const configureApp = env => {
 
   switch (env) {
     default:
-    case 'development': {
+    case 'development':
       configureDevelopment();
-    }
       break;
-    case 'production': {
+    case 'production':
       configureProduction();
-    }
       break;
-    case 'test': {
+    case 'test':
       configureTest();
-    }
       break;
   }
 };

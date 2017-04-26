@@ -112,7 +112,7 @@ let _doUpdate = (entity, body, pathContext) => {
         body.path = params.join('.');
         response = {numRemoved: 1, index: index};
       } break;
-      case 'scalar': {
+      case 'scalar':
         if (body.value instanceof Object) {
           for (let field in body.value) {
             if (!Object.prototype.hasOwnProperty.call(body.value, field)) {
@@ -130,7 +130,7 @@ let _doUpdate = (entity, body, pathContext) => {
         if (response.toObject) {
           response = response.toObject();
         }
-      } break;
+      break;
 
     }
 

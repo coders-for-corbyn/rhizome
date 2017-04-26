@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
 const Model = require('../');
 const Logging = require('../../logging');
 const Shared = require('../shared');
-const humanname = require('humanname');
+// const humanname = require('humanname');
 // const addressit = require('addressit');
 
 const schema = new mongoose.Schema();
