@@ -130,8 +130,7 @@ let _doUpdate = (entity, body, pathContext) => {
         if (response.toObject) {
           response = response.toObject();
         }
-      break;
-
+        break;
     }
 
     return entity.save().then(() => {
