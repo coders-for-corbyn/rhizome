@@ -37,7 +37,7 @@
     },
     "workstation2": {
       "logPath": {
-        "dev":"/home/c(Logging.Constants.LogLevel.INFOhris/Work/Workspaces/WebStorm/rhizome/logs/dev",
+        "dev":"/home/chris/Work/Workspaces/WebStorm/rhizome/logs/dev",
         "prod":"/home/chris/Work/Workspaces/WebStorm/rhizome/logs/prod",
         "test":"/home/chris/Work/Workspaces/WebStorm/rhizome/logs/test"
       },
