@@ -117,7 +117,7 @@ schema.statics.add = (body, owner) => {
       initials: name.initials,
       surname: name.lastName,
       suffix: name.suffix,
-      emails: [body.email],
+      emails: body.email ? [body.email] : [],
       telephone: {
         landline: body.landline,
         mobile: body.mobile
@@ -148,7 +148,8 @@ schema.statics.findAll = () => {
  */
 schema.statics.findByDetails = details => {
   if (!details.email) {
-    return Promise.reject(new Error('missing_required_field_email'));
+    return Promise.resolve(null);
+    // return Promise.reject(new Error('missing_required_field_email'));
   }
   return ModelDef.findOne({emails: details.email});
 };
