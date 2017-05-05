@@ -162,17 +162,25 @@ function _loadTokens() {
  * @private
  */
 function _configCrossDomain(req, res, next) {
-  if (req.token.type !== Model.Constants.Token.Type.USER || !req.authUser) {
+  if (!req.token) {
+    res.sendStatus(401).json({message: 'Auth token is required'});
+    return;
+  }
+  if (req.token.type !== Model.Constants.Token.Type.USER) {
     next();
     return;
   }
+  if (!req.authUser) {
+    res.sendStatus(401).json({message: 'Auth user is required'});
+    return;
+  }
 
-  Logging.log(req.header('Origin'), Logging.Constants.LogLevel.DEBUG);
-  Logging.log(req.token.domains, Logging.Constants.LogLevel.DEBUG);
+  Logging.logDebug(req.header('Origin'));
+  Logging.logDebug(req.token.domains, Logging.Constants.LogLevel.DEBUG);
 
   const domainIdx = req.token.domains.indexOf(req.header('Origin'));
   if (domainIdx === -1) {
-    next();
+    res.sendStatus(403);
     return;
   }
 
