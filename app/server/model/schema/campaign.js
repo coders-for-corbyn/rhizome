@@ -64,11 +64,14 @@ schema.add({
     index: true
   },
   type: {
-    type: String,
-    enum: types
+    type: String
   },
   description: String,
   legals: String,
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   _app: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'App'
@@ -114,7 +117,6 @@ schema.virtual('details').get(function() {
     contactLists: this.contactLists,
     images: this.images.map(i => i.label),
     templates: this.templates.map(t => t.label),
-    metadata: this._metadata,
     notes: this.notes.map(n => ({text: n.text, timestamp: n.timestamp}))
   };
 });
@@ -156,13 +158,9 @@ const __doValidation = body => {
     res.isValid = false;
     res.missing.push('type');
   }
-  if (!body.filters) {
+  if (!body.ownerId) {
     res.isValid = false;
-    res.missing.push('filters');
-  }
-  if (!body.companies && !body.people) {
-    res.isValid = false;
-    res.missing.push('data');
+    res.missing.push('ownerId');
   }
 
   return res;
@@ -187,6 +185,7 @@ const __addCampaign = body => {
       _app: Model.authApp._id,
       name: body.name,
       type: body.type,
+      ownerId: body.ownerId,
       filters: body.filters,
       _companies: body.companies,
       _people: body.people,
@@ -259,6 +258,7 @@ schema.statics.rmAll = () => {
  **********************************************************************************/
 
 const PATH_CONTEXT = {
+  '^description$': {type: 'scalar', values: []},
   '^notes$': {type: 'vector-add', values: []},
   '^notes.([0-9]{1,3}).__remove__$': {type: 'vector-rm', values: []},
   '^notes.([0-9]{1,3}).text$': {type: 'scalar', values: []}
