@@ -117,11 +117,11 @@ class AddApp extends Route {
           } break;
           case Model.Constants.Token.AuthLevel.ADMIN: {
             let permissions = [
-              {route: 'org', permission: '*'},
-              {route: 'group', permission: '*'},
-              {route: 'user', permission: '*'},
-              {route: 'person', permission: '*'},
-              {route: 'campaign', permission: '*'}
+              {route: 'org/*', permission: '*'},
+              {route: 'group/*', permission: '*'},
+              {route: 'user/*', permission: '*'},
+              {route: 'person/*', permission: '*'},
+              {route: 'campaign/*', permission: '*'}
             ];
             this.req.body.permissions = JSON.stringify(permissions);
             Logging.logDebug('Creating default ADMIN permissions');
