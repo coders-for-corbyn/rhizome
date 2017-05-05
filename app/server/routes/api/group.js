@@ -35,7 +35,7 @@ class GetGroupList extends Route {
   }
 
   _exec() {
-    return Model.Group.findAll().then(Helpers.Promise.prop('details'));
+    return Model.Group.findAll().then(Helpers.Promise.arrayProp('details'));
   }
 }
 routes.push(GetGroupList);
