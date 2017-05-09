@@ -10,10 +10,12 @@
  *
  */
 
-// var Config = require('../config');
-var Logging = require('../logging');
+const Config = require('../config');
+const Logging = require('../logging');
+const Model = require('../model');
+const Helpers = require('../helpers');
 // var OTP = require('../stotp');
-var _ = require('underscore');
+const _ = require('underscore');
 
 /**
  */
@@ -25,6 +27,7 @@ var _ = require('underscore');
 // });
 
 var _app = null;
+var _io = null;
 
 /**
  * @type {{Auth: {
@@ -72,11 +75,41 @@ var Constants = {
   }
 };
 
+class Timer {
+  constructor() {
+    this._start = 0;
+  }
+
+  start() {
+    let hrTime = process.hrtime();
+    this._last = this._start = (hrTime[0] * 1000000) + (hrTime[1] / 1000);
+  }
+
+  get lapTime() {
+    let hrTime = process.hrtime();
+    let time = (hrTime[0] * 1000000) + (hrTime[1] / 1000);
+    let lapTime = time - this._last;
+    this._last = time;
+    return (lapTime / 1000000);
+  }
+  get interval() {
+    let hrTime = process.hrtime();
+    let time = (hrTime[0] * 1000000) + (hrTime[1] / 1000);
+    return ((time - this._start) / 1000000);
+  }
+}
+
 class Route {
   constructor(path, name) {
     this.verb = Constants.Verbs.GET;
     this.auth = Constants.Auth.SUPER;
     this.permissions = Constants.Permissions.READ;
+    this.activityBroadcast = false;
+    this.activityVisibility = Model.Constants.Activity.Visibility.PRIVATE;
+    this.activityTitle = 'Private Activity';
+    this.activityDescription = '';
+
+    this._timer = new Timer();
 
     this.path = path;
     this.name = name;
@@ -98,16 +131,50 @@ class Route {
         return;
       }
 
+      this._timer.start();
       this.log(`STARTING: ${this.name}`, Logging.Constants.LogLevel.INFO);
       this._authenticate()
-        .then(Logging.log('authenticated', Logging.Constants.LogLevel.SILLY))
+        .then(Logging.Promise.logTimer(`AUTHENTICATED: ${this.name}`, this._timer, Logging.Constants.LogLevel.DEBUG))
+        .then(Logging.Promise.log('authenticated', Logging.Constants.LogLevel.SILLY))
         .then(_.bind(this._validate, this), reject)
-        .then(Logging.log('validated', Logging.Constants.LogLevel.SILLY))
+        .then(Logging.Promise.logTimer(`VALIDATED: ${this.name}`, this._timer, Logging.Constants.LogLevel.DEBUG))
+        .then(Logging.Promise.log('validated', Logging.Constants.LogLevel.SILLY))
         .then(_.bind(this._exec, this), reject)
-        .then(Logging.log('exec\'ed', Logging.Constants.LogLevel.SILLY))
-        .then(_.bind(this._logAppUsage, this))
-        .then(resolve, reject);
+        .then(Logging.Promise.logTimer(`EXECUTED: ${this.name}`, this._timer, Logging.Constants.LogLevel.DEBUG))
+        .then(_.bind(this._logActivity, this))
+        .then(Logging.Promise.logTimer(`DONE: ${this.name}`, this._timer, Logging.Constants.LogLevel.INFO))
+        .then(resolve, reject)
+        .catch(Logging.Promise.logError());
     });
+  }
+
+  _logActivity(res) {
+    Logging.logDebug(`logging activity: [${this.verb}] ${this.path} (${this.auth}:${this.permissions})`);
+    let broadcast = activity => {
+      if (this.activityBroadcast === false) {
+        return;
+      }
+
+      let userId = activity._user ? activity._user._id : null;
+
+      _io.sockets.emit('db-activity', {
+        visibility: this.activityVisibility,
+        path: this.req.path.replace(Config.app.apiPrefix, ''),
+        pathSpec: this.path,
+        verb: this.verb,
+        permissions: this.permissions,
+        title: this.activityTitle,
+        description: this.activityDescription,
+        timestamp: activity.timestamp,
+        activityId: activity._id,
+        response: res,
+        user: userId
+      });
+    };
+
+    return Model.Activity.add(this, res)
+      .then(broadcast)
+      .then(Helpers.Promise.inject(res));
   }
 
   /**
@@ -122,14 +189,14 @@ class Route {
         return;
       }
 
-      if (!this.req.appDetails) {
+      if (!this.req.token) {
         this.log('EAUTH: INVALID TOKEN', Logging.Constants.LogLevel.ERR);
         reject({statusCode: 401});
         return;
       }
 
       this.log(`AUTHLEVEL: ${this.auth}`, Logging.Constants.LogLevel.VERBOSE);
-      if (this.req.appDetails.authLevel < this.auth) {
+      if (this.req.token.authLevel < this.auth) {
         this.log('EAUTH: INSUFFICIENT AUTHORITY', Logging.Constants.LogLevel.ERR);
         reject({statusCode: 401});
         return;
@@ -145,9 +212,10 @@ class Route {
        * @TODO Support Regex in specific ie match routes like app/:id/permission
        */
       var authorised = false;
-      Logging.log(this.req.appDetails.details.permissions, Logging.Constants.LogLevel.DEBUG);
-      for (var x = 0; x < this.req.appDetails.permissions.length; x++) {
-        var p = this.req.appDetails.details.permissions[x];
+      let token = this.req.token;
+      Logging.log(token.permissions, Logging.Constants.LogLevel.SILLY);
+      for (var x = 0; x < token.permissions.length; x++) {
+        var p = token.permissions[x];
         if (this._matchRoute(p.route) && this._matchPermission(p.permission)) {
           authorised = true;
           break;
@@ -155,8 +223,9 @@ class Route {
       }
 
       if (authorised === true) {
-        resolve(this.req.appDetails);
+        resolve(this.req.token);
       } else {
+        this.log(token.permissions, Logging.Constants.LogLevel.ERR);
         this.log(`EAUTH: NO PERMISSION FOR ROUTE - ${this.path}`, Logging.Constants.LogLevel.ERR);
         reject({statusCode: 401});
       }
@@ -170,7 +239,7 @@ class Route {
    */
   _matchRoute(routeSpec) {
     if (routeSpec === '*' &&
-      this.req.appDetails.authLevel >= Constants.Auth.SUPER) {
+      this.req.token.authLevel >= Constants.Auth.SUPER) {
       return true;
     }
 
@@ -178,12 +247,12 @@ class Route {
       return true;
     }
 
-    var wildcard = /(.+)(\/\*)$/;
+    var wildcard = /(.+)(\/\*)/;
     var matches = routeSpec.match(wildcard);
     if (matches) {
       Logging.log(matches, Logging.Constants.LogLevel.DEBUG);
       if (this.path.match(new RegExp(`^${matches[1]}`)) &&
-        this.req.appDetails.authLevel >= Constants.Auth.ADMIN) {
+        this.req.token.authLevel >= Constants.Auth.ADMIN) {
         return true;
       }
     }
@@ -197,23 +266,11 @@ class Route {
    * @private
    */
   _matchPermission(permissionSpec) {
-    if (permissionSpec === '*' || permissionSpec === this.permission) {
+    if (permissionSpec === '*' || permissionSpec === this.permissions) {
       return true;
     }
 
     return false;
-  }
-
-  /**
-   * @param {*} res - whatever results are being returned by the API, just passed through
-   * @return {Promise} - passes through the previous results when DB save completes
-   * @private
-   */
-  _logAppUsage(res) {
-    return new Promise((resolve, reject) => {
-      this.req.appDetails._token.uses.push(new Date());
-      this.req.appDetails._token.save().then(() => resolve(res), reject);
-    });
   }
 
   /**
@@ -230,6 +287,12 @@ class Route {
   }
   static get app() {
     return _app;
+  }
+  static set io(io) {
+    _io = io;
+  }
+  static get io() {
+    return _io;
   }
   static get Constants() {
     return Constants;

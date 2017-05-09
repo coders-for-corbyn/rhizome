@@ -10,9 +10,11 @@
  *
  */
 
-module.exports.Promise = {};
-
-module.exports.Promise.prop = prop => (val => val[prop]);
-module.exports.Promise.func = func => (val => val[func]());
-module.exports.Promise.nop = () => (() => null);
+module.exports.Promise = {
+  prop: prop => (val => val[prop]),
+  func: func => (val => val[func]()),
+  nop: () => (() => null),
+  inject: value => (() => value),
+  arrayProp: prop => (arr => arr.map(a => a[prop]))
+};
 
