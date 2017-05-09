@@ -266,7 +266,7 @@ class Route {
    * @private
    */
   _matchPermission(permissionSpec) {
-    if (permissionSpec === '*' || permissionSpec === this.permission) {
+    if (permissionSpec === '*' || permissionSpec === this.permissions) {
       return true;
     }
 

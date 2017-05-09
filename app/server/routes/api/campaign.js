@@ -24,7 +24,7 @@ class GetCampaignList extends Route {
   constructor() {
     super('campaign', 'GET CAMPAIGN LIST');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.LIST;
   }
 
@@ -581,8 +581,8 @@ class GetMetadata extends Route {
   constructor() {
     super('campaign/:id/metadata/:key?', 'GET CAMPAIGN METADATA');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
-    this.permissions = Route.Constants.Permissions.GET;
+    this.auth = Route.Constants.Auth.USER;
+    this.permissions = Route.Constants.Permissions.READ;
   }
 
   _validate() {

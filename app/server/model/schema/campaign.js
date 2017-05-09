@@ -66,6 +66,9 @@ schema.add({
   type: {
     type: String
   },
+  status: {
+    type: String
+  },
   description: String,
   legals: String,
   ownerId: {
@@ -109,6 +112,7 @@ schema.virtual('details').get(function() {
     id: this._id,
     name: this.name,
     type: this.type,
+    status: this.status ? this.status : '',
     description: this.description,
     legals: this.legals,
     filters: this.filters.map(f => ({name: f.name, value: f.value})),
@@ -185,6 +189,7 @@ const __addCampaign = body => {
       _app: Model.authApp._id,
       name: body.name,
       type: body.type,
+      status: body.status ? body.status : '',
       ownerId: body.ownerId,
       filters: body.filters,
       _companies: body.companies,
@@ -258,7 +263,7 @@ schema.statics.rmAll = () => {
  **********************************************************************************/
 
 const PATH_CONTEXT = {
-  '^description$': {type: 'scalar', values: []},
+  '^(name|description|status)$': {type: 'scalar', values: []},
   '^notes$': {type: 'vector-add', values: []},
   '^notes.([0-9]{1,3}).__remove__$': {type: 'vector-rm', values: []},
   '^notes.([0-9]{1,3}).text$': {type: 'scalar', values: []}

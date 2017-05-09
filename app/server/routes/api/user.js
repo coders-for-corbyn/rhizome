@@ -40,6 +40,36 @@ class GetUserList extends Route {
 routes.push(GetUserList);
 
 /**
+ * @class GetSimplifiedUserList
+ */
+class GetSimplifiedUserList extends Route {
+  constructor() {
+    super('user/simplified', 'GET SIMPLIFIED USER LIST');
+    this.verb = Route.Constants.Verbs.GET;
+    this.auth = Route.Constants.Auth.USER;
+    this.permissions = Route.Constants.Permissions.LIST;
+  }
+
+  _validate() {
+    return Promise.resolve(true);
+  }
+
+  _exec() {
+    return Model.User.getAll()
+      .then(users => users.map(u => {
+        const details = u.details;
+        return {
+          id: details.id,
+          profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
+          formalName: details.person.formalName,
+          name: details.person.name
+        };
+      }));
+  }
+}
+routes.push(GetSimplifiedUserList);
+
+/**
  * @class GetUser
  */
 class GetUser extends Route {

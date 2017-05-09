@@ -24,7 +24,7 @@ class GetPostList extends Route {
   constructor() {
     super('post', 'GET POST LIST');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.LIST;
   }
 
@@ -46,7 +46,7 @@ class GetPost extends Route {
   constructor() {
     super('post/:id', 'GET POST');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.READ;
 
     this._post = false;
@@ -80,7 +80,7 @@ class AddPost extends Route {
   constructor() {
     super('post', 'ADD POST');
     this.verb = Route.Constants.Verbs.POST;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.ADD;
 
     this.activityVisibility = Model.Constants.Activity.Visibility.PUBLIC;
@@ -126,7 +126,7 @@ class UpdatePost extends Route {
   constructor() {
     super('post/:id', 'UPDATE POST');
     this.verb = Route.Constants.Verbs.PUT;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.WRITE;
     this._post = null;
 
@@ -230,7 +230,7 @@ class AddMetadata extends Route {
   constructor() {
     super('post/:id/metadata/:key', 'ADD POST METADATA');
     this.verb = Route.Constants.Verbs.POST;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.ADD;
 
     this._post = false;
@@ -278,7 +278,7 @@ class GetMetadata extends Route {
   constructor() {
     super('post/:id/metadata/:key?', 'GET POST METADATA');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.GET;
   }
 
@@ -332,7 +332,7 @@ class DeleteMetadata extends Route {
   constructor() {
     super('post/:id/metadata/:key', 'DELETE POST METADATA');
     this.verb = Route.Constants.Verbs.DEL;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.DELETE;
     this._post = false;
   }
