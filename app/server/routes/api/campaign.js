@@ -497,6 +497,9 @@ class AddCampaignMetadata extends Route {
     this.permissions = Route.Constants.Permissions.ADD;
 
     this._campaign = false;
+
+    this.activityVisibility = Model.Constants.Activity.Visibility.PRIVATE;
+    this.activityBroadcast = true;
   }
 
   _validate() {
@@ -539,6 +542,9 @@ class UpdateCampaignMetadata extends Route {
     this.permissions = Route.Constants.Permissions.ADD;
 
     this._app = false;
+
+    this.activityVisibility = Model.Constants.Activity.Visibility.PRIVATE;
+    this.activityBroadcast = true;
   }
 
   _validate() {
@@ -637,7 +643,11 @@ class DeleteCampaignMetadata extends Route {
     this.verb = Route.Constants.Verbs.DEL;
     this.auth = Route.Constants.Auth.ADMIN;
     this.permissions = Route.Constants.Permissions.DELETE;
+
     this._campaign = false;
+
+    this.activityVisibility = Model.Constants.Activity.Visibility.PRIVATE;
+    this.activityBroadcast = true;
   }
 
   _validate() {
