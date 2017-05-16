@@ -137,6 +137,32 @@ schema.statics.add = (body, personDetails, auth) => {
   return Promise.all([saveUser, getToken]);
 };
 
+schema.methods.addAuth = function(auth) {
+  Logging.log(`addAuth: ${auth.app}`, Logging.Constants.LogLevel.INFO);
+  let existing = this.auth.find(a => a.app === auth.app && a.id === auth.id);
+  if (existing) {
+    Logging.log(`present: ${auth.app}:${auth.id}`, Logging.Constants.LogLevel.DEBUG);
+    return Promise.resolve();
+  }
+
+  Logging.log(`not present: ${auth.app}:${auth.id}`, Logging.Constants.LogLevel.DEBUG);
+  this.auth.push(new Model.Appauth({
+    app: auth.app,
+    appId: auth.id,
+    username: auth.username,
+    profileUrl: auth.profileUrl,
+    images: {
+      profile: auth.profileImgUrl,
+      banner: auth.bannerImgUrl
+    },
+    email: auth.email,
+    token: auth.token,
+    tokenSecret: auth.tokenSecret,
+    refreshToken: auth.refreshToken
+  }));
+  return this.save();
+};
+
 schema.methods.updateApps = function(app) {
   Logging.log(`updateApps: ${Model.authApp._id}`, Logging.Constants.LogLevel.INFO);
   if (!this._apps) {

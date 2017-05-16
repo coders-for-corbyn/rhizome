@@ -304,6 +304,63 @@ class AddUser extends Route {
 routes.push(AddUser);
 
 /**
+ * @class AddUserAuth
+ */
+class AddUserAuth extends Route {
+  constructor() {
+    super('user/:id/auth', 'ADD USER AUTH');
+    this.verb = Route.Constants.Verbs.PUT;
+    this.auth = Route.Constants.Auth.ADMIN;
+    this.permissions = Route.Constants.Permissions.ADD;
+
+    this._user = null;
+  }
+
+  _validate() {
+    return new Promise((resolve, reject) => {
+      Logging.log(this.req.body.auth, Logging.Constants.LogLevel.DEBUG);
+      let auth = this.req.body.auth;
+
+      if (!auth || !auth.app || !auth.id || !auth.profileImgUrl || !auth.token) {
+        this.log('ERROR: Missing required field', Route.LogLevel.ERR);
+        reject({statusCode: 400});
+        return;
+      }
+
+      Model.User.findById(this.req.params.id).populate('_person').select('-metadata').then(user => {
+        Logging.log(`User: ${user ? user.id : null}`, Logging.Constants.LogLevel.DEBUG);
+        this._user = user;
+        if (this._user) {
+          resolve(true);
+        } else {
+          this.log('ERROR: Invalid User ID', Route.LogLevel.ERR);
+          resolve({statusCode: 400});
+        }
+      });
+    });
+  }
+
+  _exec() {
+    return this._user
+      .addAuth(this.req.body.auth)
+      .then(user => {
+        let tasks = [
+          Promise.resolve(user.details),
+          Model.Token.findUserAuthToken(this._user._id, this.req.authApp._id)
+        ];
+
+        if (this._user._person) {
+          tasks.push(this._user._person.updateFromAuth(this.req.body.auth));
+        }
+
+        return Promise.all(tasks);
+      })
+      .then(res => Object.assign(res[0], {authToken: res[1] ? res[1].value : false}));
+  }
+}
+routes.push(AddUserAuth);
+
+/**
  * @class UpdateUser
  */
 class UpdateUser extends Route {
@@ -589,9 +646,10 @@ class GetMetadata extends Route {
           reject({statusCode: 400});
           return;
         }
-        if (`${user._app}` !== `${this.req.authApp._id}`) {
+        let appIndex = user._apps.findIndex(a => `${a}` === `${this.req.authApp._id}`);
+        if (appIndex === -1) {
           this.log('ERROR: Not authorised', Route.LogLevel.ERR);
-          reject({statusCode: 401});
+          reject({statusCode: 401, message: `App:${this.req.authApp._id} is not authorised for this user.`});
           return;
         }
         // Logging.log(this._metadata.value, Route.LogLevel.INFO);
