@@ -68,31 +68,28 @@ function _authenticateToken(req, res, next) {
   Logging.log(`Token: ${req.query.token}`, Logging.Constants.LogLevel.SILLY);
   if (!req.query.token) {
     Logging.log('EAUTH: Missing Token', Logging.Constants.LogLevel.ERR);
-    res.sendStatus(400);
+    res.status(400).json({message: 'missing_token'});
     return;
   }
   _getToken(req.query.token)
   .then(token => {
-    if (token === null) {
-      Logging.log('EAUTH: Invalid Token', Logging.Constants.LogLevel.ERR);
-      res.sendStatus(401);
-      return;
-    }
-    // console.log(`_authenticateToken (pre-save): ${_timers[req.path].interval.toFixed(3)}`);
+    return new Promise((resolve, reject) => {
+      if (token === null) {
+        Logging.log('EAUTH: Invalid Token', Logging.Constants.LogLevel.ERR);
+        res.status(401).json({message: 'invalid_token'});
+        reject({message: 'invalid_token'});
+        return;
+      }
+      Model.token = req.token = token.details;
+      Model.authApp = req.authApp = token._app;
+      Model.authUser = req.authUser = token._user;
 
-    Model.token = req.token = token.details;
-    Model.authApp = req.authApp = token._app;
-    Model.authUser = req.authUser = token._user;
+      Model.Token.update({_id: token.id}, {$push: {
+        uses: new Date()
+      }});
 
-    Model.Token.update({_id: token.id}, {$push: {
-      uses: new Date()
-    }});
-    // .then((res) => {
-    //   console.log(token.id);
-    //   console.log(res);
-    // });
-
-    // console.log(`_authenticateToken (post-save): ${_timers[req.path].interval.toFixed(3)}`);
+      resolve();
+    });
   })
   .then(Helpers.Promise.inject())
   .then(next)
@@ -163,7 +160,7 @@ function _loadTokens() {
  */
 function _configCrossDomain(req, res, next) {
   if (!req.token) {
-    res.sendStatus(401).json({message: 'Auth token is required'});
+    res.status(401).json({message: 'Auth token is required'});
     return;
   }
   if (req.token.type !== Model.Constants.Token.Type.USER) {
@@ -171,7 +168,7 @@ function _configCrossDomain(req, res, next) {
     return;
   }
   if (!req.authUser) {
-    res.sendStatus(401).json({message: 'Auth user is required'});
+    res.status(401).json({message: 'Auth user is required'});
     return;
   }
 

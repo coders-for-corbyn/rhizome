@@ -45,6 +45,7 @@ var schema = new mongoose.Schema({
   locale: String,
   token: String,
   tokenSecret: String,
+  refreshToken: String,
   extras: String
 });
 
@@ -60,6 +61,7 @@ schema.virtual('details').get(function() {
     username: this.username,
     token: this.token,
     tokenSecret: this.tokenSecret,
+    refreshToken: this.refreshToken,
     profileUrl: this.profileUrl,
     images: this.images,
     email: this.email
