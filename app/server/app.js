@@ -79,7 +79,7 @@ app.db.connection.on('connected', () => {
   Bootstrap
     .app(app, io)
     .then(() => {
-      Logging.log(`${Config.app.title} listening on port ` +
+      Logging.log(`${Config.app.title} v${Config.app.version} listening on port ` +
         `${app.get('port')} in ${app.settings.env} mode.`, Logging.Constants.LogLevel.INFO);
       app.server = server.listen(app.set('port'));
     })
