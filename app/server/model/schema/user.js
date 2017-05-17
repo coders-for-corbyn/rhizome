@@ -139,10 +139,10 @@ schema.statics.add = (body, personDetails, auth) => {
 
 schema.methods.addAuth = function(auth) {
   Logging.log(`addAuth: ${auth.app}`, Logging.Constants.LogLevel.INFO);
-  let existing = this.auth.find(a => a.app === auth.app && a.id === auth.id);
+  let existing = this.auth.find(a => a.app === auth.app && a.id == auth.id); // eslint-disable-line eqeqeq
   if (existing) {
     Logging.log(`present: ${auth.app}:${auth.id}`, Logging.Constants.LogLevel.DEBUG);
-    return Promise.resolve();
+    return Promise.resolve(this);
   }
 
   Logging.log(`not present: ${auth.app}:${auth.id}`, Logging.Constants.LogLevel.DEBUG);
