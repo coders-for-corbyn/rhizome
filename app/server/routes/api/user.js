@@ -24,28 +24,6 @@ class GetUserList extends Route {
   constructor() {
     super('user', 'GET USER LIST');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
-    this.permissions = Route.Constants.Permissions.LIST;
-  }
-
-  _validate() {
-    return Promise.resolve(true);
-  }
-
-  _exec() {
-    return Model.User.getAll()
-    .then(users => users.map(u => u.details));
-  }
-}
-routes.push(GetUserList);
-
-/**
- * @class GetSimplifiedUserList
- */
-class GetSimplifiedUserList extends Route {
-  constructor() {
-    super('user/simplified', 'GET SIMPLIFIED USER LIST');
-    this.verb = Route.Constants.Verbs.GET;
     this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.LIST;
   }
@@ -56,18 +34,53 @@ class GetSimplifiedUserList extends Route {
 
   _exec() {
     return Model.User.getAll()
-      .then(users => users.map(u => {
-        const details = u.details;
-        return {
-          id: details.id,
-          profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
-          formalName: details.person.formalName,
-          name: details.person.name
-        };
-      }));
+      .then(users => {
+        if (this.req.token.authLevel >= Route.Constants.Auth.ADMIN) {
+          return users.map(u => u.details);
+        }
+        return users.map(u => {
+          const details = u.details;
+          return {
+            id: details.id,
+            profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
+            formalName: details.person.formalName,
+            name: details.person.name
+          };
+        });
+      });
   }
 }
-routes.push(GetSimplifiedUserList);
+routes.push(GetUserList);
+
+/**
+ * @class GetSimplifiedUserList
+ */
+// class GetSimplifiedUserList extends Route {
+//   constructor() {
+//     super('user/simplified', 'GET SIMPLIFIED USER LIST');
+//     this.verb = Route.Constants.Verbs.GET;
+//     this.auth = Route.Constants.Auth.USER;
+//     this.permissions = Route.Constants.Permissions.LIST;
+//   }
+//
+//   _validate() {
+//     return Promise.resolve(true);
+//   }
+//
+//   _exec() {
+//     return Model.User.getAll()
+//       .then(users => users.map(u => {
+//         const details = u.details;
+//         return {
+//           id: details.id,
+//           profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
+//           formalName: details.person.formalName,
+//           name: details.person.name
+//         };
+//       }));
+//   }
+// }
+// routes.push(GetSimplifiedUserList);
 
 /**
  * @class GetUser
@@ -542,7 +555,7 @@ class AddUserMetadata extends Route {
   constructor() {
     super('user/:id/metadata/:key', 'ADD USER METADATA');
     this.verb = Route.Constants.Verbs.POST;
-    this.auth = Route.Constants.Auth.ADMIN;
+    this.auth = Route.Constants.Auth.USER;
     this.permissions = Route.Constants.Permissions.ADD;
 
     this._user = false;
@@ -584,8 +597,8 @@ class UpdateUserMetadata extends Route {
   constructor() {
     super('user/:id/metadata/:key', 'UPDATE USER METADATA');
     this.verb = Route.Constants.Verbs.PUT;
-    this.auth = Route.Constants.Auth.ADMIN;
-    this.permissions = Route.Constants.Permissions.ADD;
+    this.auth = Route.Constants.Auth.USER;
+    this.permissions = Route.Constants.Permissions.WRITE;
 
     this._app = false;
   }
@@ -630,8 +643,8 @@ class GetMetadata extends Route {
   constructor() {
     super('user/:id/metadata/:key?', 'GET USER METADATA');
     this.verb = Route.Constants.Verbs.GET;
-    this.auth = Route.Constants.Auth.ADMIN;
-    this.permissions = Route.Constants.Permissions.GET;
+    this.auth = Route.Constants.Auth.USER;
+    this.permissions = Route.Constants.Permissions.READ;
   }
 
   _validate() {

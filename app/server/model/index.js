@@ -29,9 +29,11 @@ class Model {
     this.Schema = {};
     this.Constants = {};
     this.app = false;
+    this.mongoDb = null;
   }
 
-  init() {
+  init(db) {
+    this.mongoDb = db;
     var models = _getModels();
     Logging.log(models, Logging.Constants.LogLevel.DEBUG);
     for (var x = 0; x < models.length; x++) {

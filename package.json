@@ -30,6 +30,7 @@
     "juice": "~3.0.x",
     "less": "~2.7.x",
     "method-override": "~2.3.x",
+    "mongodb": "^2.2.26",
     "mongoose": "~4.4.x",
     "morgan": "~1.7.x",
     "passport": "~0.3.x",
