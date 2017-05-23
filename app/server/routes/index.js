@@ -16,6 +16,7 @@ const Route = require('./route');
 const Logging = require('../logging');
 const Helpers = require('../helpers');
 const Model = require('../model');
+const Mongo = require('mongodb');
 
 /**
  * @param {Object} app - express app object
@@ -27,7 +28,15 @@ function _initRoute(app, Route) {
   app[route.verb](`/api/v1/${route.path}`, (req, res) => {
     route
       .exec(req, res)
-      .then(result => res.json(result))
+      .then(result => {
+        if (result instanceof Mongo.Cursor) {
+          let stringifyStream = new Helpers.JSONStringifyStream();
+          res.set('Content-Type', 'application/json');
+          result.stream().pipe(stringifyStream).pipe(res);
+        } else {
+          res.json(result);
+        }
+      })
       .catch(err => {
         Logging.log(err, Logging.Constants.LogLevel.ERR);
         res.status(err.statusCode ? err.statusCode : 500).json({message: err.message});
@@ -36,24 +45,6 @@ function _initRoute(app, Route) {
 }
 
 let _tokens = [];
-// let _timers = {};
-
-// class Timer {
-//   constructor() {
-//     this._start = 0;
-//   }
-//
-//   start() {
-//     let hrTime = process.hrtime();
-//     this._start = (hrTime[0] * 1000000) + (hrTime[1] / 1000);
-//   }
-//
-//   get interval() {
-//     let hrTime = process.hrtime();
-//     let time = (hrTime[0] * 1000000) + (hrTime[1] / 1000);
-//     return ((time - this._start) / 1000000);
-//   }
-// }
 
 /**
  * @param {Object} req - Request object
@@ -62,10 +53,9 @@ let _tokens = [];
  * @private
  */
 function _authenticateToken(req, res, next) {
-  // _timers[req.path] = new Timer();
-  // _timers[req.path].start();
-
   Logging.log(`Token: ${req.query.token}`, Logging.Constants.LogLevel.SILLY);
+  req.session = null; // potentially prevents a write
+
   if (!req.query.token) {
     Logging.log('EAUTH: Missing Token', Logging.Constants.LogLevel.ERR);
     res.status(400).json({message: 'missing_token'});
