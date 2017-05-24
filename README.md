@@ -1,6 +1,11 @@
-# rhizome
-### version: 1.0.4
+# Rhizome
 The API that feeds grass roots movements.
+
+# What's New
+### version: 1.0.5
+- Logging in can update all related authenticating app (twitter, facebook, google, etc...) info not just the token 
+
+
 ## Prerequisites ##
 You'll need gulp:
 `npm install -g gulp && npm install gulp`
