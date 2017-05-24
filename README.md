@@ -2,7 +2,10 @@
 The API that feeds grass roots movements.
 
 # What's New
-### version: 1.0.5
+### version: 1.0.6
+- Added some fields to post to support ugc.
+
+### 1.0.5
 - Logging in can update all related authenticating app (twitter, facebook, google, etc...) info not just the token 
 
 
