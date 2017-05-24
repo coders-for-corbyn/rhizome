@@ -271,6 +271,32 @@ schema.methods.updateToken = function(app, body) {
 };
 
 /**
+ * @param {string} app - name of the app for which the token is being updated
+ * @param {Object} updated - updated app information passed through from a PUT request
+ * @return {Promise} - returns a promise that is fulfilled when the database request is completed
+ */
+schema.methods.updateAppInfo = function(app, updated) {
+  var auth = this.auth.find(a => a.app === app);
+  if (!auth) {
+    Logging.log(`Unable to find Appauth for ${app}`, Logging.Constants.LogLevel.DEBUG);
+    return Promise.resolve(false);
+  }
+
+  auth.username = updated.username;
+  auth.profileUrl = updated.profileUrl;
+  auth.images.profile = updated.profileImgUrl;
+  auth.images.banner = updated.bannerImgUrl;
+  auth.email = updated.email;
+  auth.token = updated.token;
+  auth.tokenSecret = updated.tokenSecret;
+  auth.refreshToken = updated.refreshToken;
+
+  Logging.logDebug(updated.profileImgUrl);
+
+  return this.save().then(() => true);
+};
+
+/**
  * @param {string} key - index name of the metadata
  * @param {*} value - value of the meta data
  * @return {Promise} - resolves when save operation is completed, rejects if metadata already exists
