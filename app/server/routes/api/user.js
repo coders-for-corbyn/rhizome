@@ -211,6 +211,47 @@ class CreateUserAuthToken extends Route {
 routes.push(CreateUserAuthToken);
 
 /**
+ * @class UpdateUserAppInfo
+ */
+class UpdateUserAppInfo extends Route {
+  constructor() {
+    super('user/:id/:app(twitter|facebook|google)/info', 'UPDATE USER APP INFO');
+    this.verb = Route.Constants.Verbs.PUT;
+    this.auth = Route.Constants.Auth.ADMIN;
+    this.permissions = Route.Constants.Permissions.WRITE;
+
+    this._user = false;
+  }
+
+  _validate() {
+    return new Promise((resolve, reject) => {
+      if (!this.req.body ||
+        !this.req.body.token) {
+        this.log('ERROR: Missing required field', Route.LogLevel.ERR);
+        reject({statusCode: 400});
+        return;
+      }
+
+      Model.User.findById(this.req.params.id).select('-metadata').then(user => {
+        Logging.log(`User: ${user ? user.id : null}`, Logging.Constants.LogLevel.DEBUG);
+        this._user = user;
+        if (this._user) {
+          resolve(true);
+        } else {
+          this.log('ERROR: Invalid User ID', Route.LogLevel.ERR);
+          resolve({statusCode: 400});
+        }
+      });
+    });
+  }
+
+  _exec() {
+    return this._user.updateAppInfo(this.req.params.app, this.req.body);
+  }
+}
+routes.push(UpdateUserAppInfo);
+
+/**
  * @class UpdateUserAppToken
  */
 class UpdateUserAppToken extends Route {
