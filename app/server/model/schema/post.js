@@ -62,6 +62,7 @@ schema.add({
   text: String,
   image: String,
   url: String,
+  tags: String,
   postType: {
     type: String,
     enum: types
@@ -109,6 +110,7 @@ schema.virtual('details').get(function() {
     id: this._id,
     text: this.text,
     image: this.image,
+    tags: this.tags,
     url: this.url,
     type: this.postType,
     ownerId: this.ownerId && this.ownerId._id ? this.ownerId._id : this.ownerId,
@@ -177,6 +179,7 @@ const __add = body => {
       text: body.text,
       image: body.image,
       url: body.url,
+      tags: body.tags,
       postType: body.type,
       entityId: body.entityId
     });
@@ -217,7 +220,7 @@ schema.statics.rmAll = () => {
  **********************************************************************************/
 
 const PATH_CONTEXT = {
-  '^(text|image|url)$': {type: 'scalar', values: []},
+  '^(text|image|url|tags)$': {type: 'scalar', values: []},
   '^likeUserIds$': {type: 'vector-add', values: []},
   '^likeUserIds.([0-9]{1,3}).__remove__$': {type: 'vector-rm', values: []},
   '^notes$': {type: 'vector-add', values: []},
