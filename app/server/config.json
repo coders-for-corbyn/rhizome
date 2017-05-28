@@ -7,6 +7,7 @@
     "RHIZOME_MONGO_URL_TEST": "",
     "RHIZOME_REDIS_PORT": "6379",
     "RHIZOME_REDIS_HOST": "localhost",
+    "RHIZOME_REST_APP": "primary",
     "RHIZOME_SOCKET_APP": "primary"
   },
   "global": {
@@ -15,7 +16,7 @@
       "title": "Rhizome",
       "description": "The API that supports grassroots movements.",
       "code": "rhizome",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "protocol": "http",
       "subdomain": "rhizome",
       "domain": "codersforlabour.com",
@@ -30,6 +31,9 @@
     },
     "sio": {
       "app": "%RHIZOME_SOCKET_APP%"
+    },
+    "rest": {
+      "app": "%RHIZOME_REST_APP%"
     },
     "redis": {
       "port": "%RHIZOME_REDIS_PORT%",
@@ -50,9 +54,9 @@
         "test": "/home/chris/Work/Workspaces/WebStorm/rhizome/app_data/test"
       },
       "listenPort": {
-        "dev": 6001,
-        "prod": 6000,
-        "test": 6002
+        "dev": 9001,
+        "prod": 9000,
+        "test": 9002
       },
       "socket": {
         "listenPort": {

@@ -2,7 +2,11 @@
 The API that feeds grass roots movements.
 
 # What's New
-### version: 1.1.0
+### version: 1.2.0
+- REST app refactored for scale using cluster.
+- Simplified app.js, bootstrap updated.
+
+### 1.1.0
 - Web Sockets refactored for scale. 
 - Now uses redis to co-ordinate multiple socket servers.
 - Socket Server is broken out into its own app.
