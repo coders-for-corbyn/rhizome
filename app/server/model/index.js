@@ -10,9 +10,9 @@
  *
  */
 
-var path = require('path');
-var fs = require('fs');
-var Logging = require('../logging');
+let path = require('path');
+let fs = require('fs');
+let Logging = require('../logging');
 require('sugar');
 
 /**
@@ -34,9 +34,9 @@ class Model {
 
   init(db) {
     this.mongoDb = db;
-    var models = _getModels();
-    Logging.log(models, Logging.Constants.LogLevel.DEBUG);
-    for (var x = 0; x < models.length; x++) {
+    let models = _getModels();
+    Logging.log(models, Logging.Constants.LogLevel.SILLY);
+    for (let x = 0; x < models.length; x++) {
       this._initModel(models[x]);
     }
   }
@@ -61,7 +61,6 @@ class Model {
     }
     return this.models[model];
   }
-
 }
 
 /**
@@ -69,11 +68,11 @@ class Model {
  * @return {array} - list of files containing schemas
  */
 function _getModels() {
-  var filenames = fs.readdirSync(`${__dirname}/schema`);
+  let filenames = fs.readdirSync(`${__dirname}/schema`);
 
-  var files = [];
-  for (var x = 0; x < filenames.length; x++) {
-    var file = filenames[x];
+  let files = [];
+  for (let x = 0; x < filenames.length; x++) {
+    let file = filenames[x];
     if (path.extname(file) === '.js') {
       files.push(path.basename(file, '.js').capitalize());
     }
