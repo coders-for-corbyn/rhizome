@@ -187,11 +187,8 @@ function _configCrossDomain(req, res, next) {
  * @param {Object} io - socket io object
  * @return {Promise} - resolves once the tokens have been pre-cached
  */
-exports.init = (app, io) => {
+exports.init = app => {
   Route.app = app;
-  Route.io = io;
-
-  io.origins('*:*');
 
   app.get('/favicon.ico', (req, res, next) => res.sendStatus(404));
   app.get('/index.html', (req, res, next) => res.send('<html><head><title>Rhizome</title></head></html>'));
