@@ -16,7 +16,7 @@
       "title": "Rhizome",
       "description": "The API that supports grassroots movements.",
       "code": "rhizome",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "protocol": "http",
       "subdomain": "rhizome",
       "domain": "codersforlabour.com",
