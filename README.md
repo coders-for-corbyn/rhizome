@@ -2,7 +2,12 @@
 The API that feeds grass roots movements.
 
 # What's New
-### version: 1.0.6
+### version: 1.1.0
+- Web Sockets refactored for scale. 
+- Now uses redis to co-ordinate multiple socket servers.
+- Socket Server is broken out into its own app.
+
+### 1.0.6
 - Added some fields to post to support ugc.
 
 ### 1.0.5
@@ -18,6 +23,12 @@ You'll need nodemon:
 
 Then you'll need to grab the latest modules:
 `npm install`
+
+You'll need redis installed:
+`$ sudo add-apt-repository ppa:chris-lea/redis-server
+ $ sudo apt-get update
+ $ sudo apt-get install redis-server`
+
 ## Configuring ##
 You need to setup an environment variable: `SERVER_ID`
 Add `export SERVER_ID = 'name'` to your .profile or .bashrc
