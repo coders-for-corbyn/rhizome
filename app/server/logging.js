@@ -39,6 +39,11 @@ module.exports.Constants = {
   LogLevel: LogLevel
 };
 
+let _logApp = '';
+module.exports.setLogApp = app => {
+  _logApp = app;
+};
+
 /**
  *
  */
@@ -60,23 +65,23 @@ winston.add(winston.transports.Rotate, {
   colorize: 'all',
   timestamp: true
 });
-winston.add(winston.transports.Rotate, {
-  name: 'verbose-file',
-  json: false,
-  file: `${Config.logPath}/log-verbose.log`,
-  size: '1m',
-  keep: 5,
-  colorize: 'all',
-  level: 'verbose',
-  timestamp: true
-});
+// winston.add(winston.transports.Rotate, {
+//   name: 'verbose-file',
+//   json: false,
+//   file: `${Config.logPath}/log-verbose.log`,
+//   size: '1m',
+//   keep: 5,
+//   colorize: 'all',
+//   level: 'verbose',
+//   timestamp: true
+// });
 winston.add(winston.transports.Rotate, {
   name: 'error-file',
   json: false,
   file: `${Config.logPath}/log-err.log`,
   size: '1m',
   keep: 10,
-  level: 'err',
+  level: 'error',
   timestamp: true
 });
 winston.addColors({
@@ -94,7 +99,7 @@ winston.addColors({
  * @private
  */
 function _log(log, level) {
-  winston.log(level, log);
+  winston.log(level, `[${_logApp}]: ${log}`);
   // if (typeof log === 'string') {
   //   winston.log(level, log);
   // } else {

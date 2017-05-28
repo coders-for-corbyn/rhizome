@@ -16,6 +16,9 @@ const Model = require('../model');
 const Helpers = require('../helpers');
 const _ = require('underscore');
 const Mongo = require('mongodb');
+const NRP = require('node-redis-pubsub');
+
+const nrp = new NRP(Config.redis);
 
 /**
  */
@@ -135,14 +138,14 @@ class Route {
         return;
       }
 
-      _io.sockets.emit('db-activity', {
+      nrp.emit('activity', {
+        title: this.activityTitle,
+        description: this.activityDescription,
         visibility: this.activityVisibility,
         path: this.req.path.replace(Config.app.apiPrefix, ''),
         pathSpec: this.path,
         verb: this.verb,
         permissions: this.permissions,
-        title: this.activityTitle,
-        description: this.activityDescription,
         timestamp: new Date(),
         response: res,
         user: Model.authUser ? Model.authUser._id : ''

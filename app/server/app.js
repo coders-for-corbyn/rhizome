@@ -13,7 +13,6 @@
 const express = require('express');
 const app = module.exports = express();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
 
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
@@ -28,21 +27,21 @@ const Logging = require('./logging');
  */
 const configureDevelopment = () => {
   Config.env = 'dev';
-  app.set('db-uri', `mongodb://${Config.RHIZOME_MONGO_URL_DEV}/${Config.app.code}-dev`);
+  app.set('db-uri', `mongodb://${Config.mongoDb.url}/${Config.app.code}-dev`);
   app.use(morgan('short'));
   app.set('port', Config.listenPort);
 };
 
 const configureProduction = () => {
   Config.env = 'prod';
-  app.set('db-uri', `mongodb://${Config.RHIZOME_MONGO_URL_PROD}/${Config.app.code}-prod`);
+  app.set('db-uri', `mongodb://${Config.mongoDb.url}/${Config.app.code}-prod`);
   app.use(morgan('short'));
   app.set('port', Config.listenPort);
 };
 
 const configureTest = () => {
   Config.env = 'test';
-  app.set('db-uri', `mongodb://${Config.RHIZOME_MONGO_URL_TEST}/${Config.app.code}-test`);
+  app.set('db-uri', `mongodb://${Config.mongoDb.url}/${Config.app.code}-test`);
   app.use(morgan('short'));
   app.set('port', Config.listenPort);
 };
@@ -77,9 +76,9 @@ configureApp(app.get('env'));
 app.db = mongoose.connect(app.get('db-uri'));
 app.db.connection.on('connected', () => {
   Bootstrap
-    .app(app, io)
+    .rest(app)
     .then(() => {
-      Logging.log(`${Config.app.title} v${Config.app.version} listening on port ` +
+      Logging.log(`${Config.app.title} REST Server v${Config.app.version} listening on port ` +
         `${app.get('port')} in ${app.settings.env} mode.`, Logging.Constants.LogLevel.INFO);
       app.server = server.listen(app.set('port'));
     })

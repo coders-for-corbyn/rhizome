@@ -1,23 +1,43 @@
 {
+  "environment": {
+    "NODE_ENV": "development",
+    "RHIZOME_SERVER_ID": "",
+    "RHIZOME_MONGO_URL_DEV": "",
+    "RHIZOME_MONGO_URL_PROD": "",
+    "RHIZOME_MONGO_URL_TEST": "",
+    "RHIZOME_REDIS_PORT": "6379",
+    "RHIZOME_REDIS_HOST": "localhost",
+    "RHIZOME_SOCKET_APP": "primary"
+  },
   "global": {
+    "env": "%NODE_ENV%",
     "app": {
       "title": "Rhizome",
       "description": "The API that supports grassroots movements.",
       "code": "rhizome",
-      "version": "1.0.6",
+      "version": "1.1.0",
       "protocol": "http",
       "subdomain": "rhizome",
       "domain": "codersforlabour.com",
       "apiPrefix": "/api/v1/"
+    },
+    "mongoDb": {
+      "url": {
+        "dev": "%RHIZOME_MONGO_URL_DEV%",
+        "prod": "%RHIZOME_MONGO_URL_PROD%",
+        "test": "%RHIZOME_MONGO_URL_TEST%"
+      }
+    },
+    "sio": {
+      "app": "%RHIZOME_SOCKET_APP%"
+    },
+    "redis": {
+      "port": "%RHIZOME_REDIS_PORT%",
+      "host": "%RHIZOME_REDIS_HOST%",
+      "scope": "rhizome-internal"
     }
   },
   "local": {
-    "environment": {
-      "RHIZOME_SERVER_ID": "",
-      "RHIZOME_MONGO_URL_DEV": "",
-      "RHIZOME_MONGO_URL_PROD": "",
-      "RHIZOME_MONGO_URL_TEST": ""
-    },
     "workstation1": {
       "logPath": {
         "dev":"/home/chris/Work/Workspaces/WebStorm/rhizome/logs/dev",
@@ -33,6 +53,13 @@
         "dev": 6001,
         "prod": 6000,
         "test": 6002
+      },
+      "socket": {
+        "listenPort": {
+          "dev": 8001,
+          "prod": 8000,
+          "test": 8002
+        }
       }
     },
     "workstation2": {
