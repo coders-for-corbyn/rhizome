@@ -78,6 +78,10 @@ class JSONStringifyStream extends Transform {
   }
 
   _flush(cb) {
+    if (this._first) {
+      this._first = false;
+      this.push('[');
+    }
     this.push(']');
     cb();
   }
