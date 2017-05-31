@@ -183,7 +183,7 @@ function _configCrossDomain(req, res, next) {
     return;
   }
 
-  res.header('Access-Control-Allow-Origin', `${req.token.domains[domainIdx]}`);
+  res.header('Access-Control-Allow-Origin', req.header('Origin'));
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'content-type');
 
