@@ -162,10 +162,22 @@ function _configCrossDomain(req, res, next) {
     return;
   }
 
-  Logging.logDebug(req.header('Origin'));
-  Logging.logDebug(req.token.domains, Logging.Constants.LogLevel.DEBUG);
+  const rex = /https?:\/\/(.+)$/;
+  let origin = req.header('Origin');
+  let matches = rex.exec(origin);
+  if (matches) {
+    origin = matches[1];
+  }
 
-  const domainIdx = req.token.domains.indexOf(req.header('Origin'));
+  let domains = req.token.domains.map(d => {
+    matches = rex.exec(d);
+    return matches ? matches[1] : d;
+  });
+
+  Logging.logDebug(origin);
+  Logging.logDebug(domains);
+
+  const domainIdx = domains.indexOf(origin);
   if (domainIdx === -1) {
     res.sendStatus(403);
     return;
