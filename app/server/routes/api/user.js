@@ -33,21 +33,30 @@ class GetUserList extends Route {
   }
 
   _exec() {
-    return Model.User.getAll()
-      .then(users => {
-        if (this.req.token.authLevel >= Route.Constants.Auth.ADMIN) {
+    if (this.req.token.authLevel >= Route.Constants.Auth.ADMIN) {
+      return Model.User.getAll()
+        .then(users => {
           return users.map(u => u.details);
-        }
-        return users.map(u => {
-          const details = u.details;
-          return {
-            id: details.id,
-            profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
-            formalName: details.person.formalName,
-            name: details.person.name
-          };
         });
-      });
+    }
+
+    return Model.User.getSimplified();
+
+    // return Model.User.getAll()
+    //   .then(users => {
+    //     if (this.req.token.authLevel >= Route.Constants.Auth.ADMIN) {
+    //       return users.map(u => u.details);
+    //     }
+    //     return users.map(u => {
+    //       const details = u.details;
+    //       return {
+    //         id: details.id,
+    //         profiles: details.auth.map(a => ({app: a.app, username: a.username, url: a.profileUrl, image: a.images.profile})),
+    //         formalName: details.person.formalName,
+    //         name: details.person.name
+    //       };
+    //     });
+    //   });
   }
 }
 routes.push(GetUserList);
