@@ -197,7 +197,6 @@ schema.statics.rm = function(user) {
 };
 
 /**
- * @param {ObjectId} appId - id of the App that owns the user
  * @return {Promise} - resolves to an array of Apps (native Mongoose objects)
  */
 schema.statics.getAll = () => {
@@ -208,6 +207,22 @@ schema.statics.getAll = () => {
   }
 
   return ModelDef.find({_apps: Model.authApp._id}).populate('_person');
+};
+
+const collection = Model.mongoDb.collection('users');
+
+/**
+ * @return {Promise} - resolves to an array of Apps (native Mongoose objects)
+ */
+schema.statics.getSimplified = () => {
+  Logging.log(`getSimplified: ${Model.authApp._id}`, Logging.Constants.LogLevel.DEBUG);
+
+  if (Model.token.authLevel === Model.Constants.Token.AuthLevel.SUPER) {
+    return ModelDef.find({});
+  }
+
+  // return ModelDef.find({_apps: Model.authApp._id}).select('_id').lean();
+  return collection.find({_apps: Model.authApp._id}, {_id: 1});
 };
 
 /**
