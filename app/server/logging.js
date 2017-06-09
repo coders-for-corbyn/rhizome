@@ -128,8 +128,35 @@ module.exports.log = (log, level) => {
 /**
  * @param {string} log - Text to log
  */
+module.exports.logVerbose = log => {
+  module.exports.log(log, LogLevel.VERBOSE);
+};
+
+/**
+ * @param {string} log - Text to log
+ */
 module.exports.logDebug = log => {
   module.exports.log(log, LogLevel.DEBUG);
+};
+
+/**
+ * @param {string} log - Text to log
+ */
+module.exports.logSilly = log => {
+  module.exports.log(log, LogLevel.SILLY);
+};
+
+/**
+ * @param {string} warn - warning to log
+ */
+module.exports.logWarn = warn => {
+  _log(warn, LogLevel.WARN);
+};
+/**
+ * @param {string} err - error object to log
+ */
+module.exports.logError = err => {
+  _log(err, LogLevel.ERR);
 };
 
 /**
@@ -301,6 +328,23 @@ module.exports.Promise.logTimer = (log, timer, level) => {
   level = level || LogLevel.INFO;
   return res => {
     _log(`${log} [${timer.lapTime.toFixed(6)}s] [${timer.interval.toFixed(6)}s]`, level);
+    return res;
+  };
+};
+
+/**
+ * @param {string} log - Text to log
+ * @param {Object} timer - Object with an 'interval' property
+ * @param {string} time - time above which to log the exception
+ * @return {function(*)} - returns a function for chaining into a promise
+ */
+module.exports.Promise.logTimerException = (log, timer, time) => {
+  let level = LogLevel.ERR;
+  return res => {
+    if (timer.interval > time) {
+      _log(`${log} ${timer.interval.toFixed(3)}s`, level);
+    }
+
     return res;
   };
 };
