@@ -21,6 +21,7 @@ const morgan = require('morgan');
 
 const Config = require('./config');
 const Model = require('./model');
+// const Helpers = require('./helpers');
 const Routes = require('./routes');
 const Logging = require('./logging');
 const MongoClient = require('mongodb').MongoClient;
@@ -39,7 +40,7 @@ const _workers = [];
  *
  **********************************************************************************/
 const __spawnWorkers = () => {
-  Logging.log(`Spawning ${processes} REST Workers`);
+  Logging.logVerbose(`Spawning ${processes} REST Workers`);
 
   const __spawn = idx => {
     _workers[idx] = cluster.fork();
@@ -126,15 +127,48 @@ const __systemInstall = () => {
  * MONGODB
  *
  **********************************************************************************/
+const POOL_SIZE = 10;
 const __nativeMongoConnect = app => {
-  return new Promise((resolve, reject) => {
-    const mongoUrl = `mongodb://${Config.mongoDb.url}/${Config.app.code}-${Config.env}`;
-    MongoClient.connect(mongoUrl, (err, db) => {
-      if (err) throw err;
-      Model.init(db);
-      resolve();
+  const mongoUrl = `mongodb://${Config.mongoDb.url}/${Config.app.code}-dev`;
+  // const mongoUrl = `mongodb://${Config.mongoDb.url}/${Config.app.code}-${Config.env}`;
+  return MongoClient.connect(mongoUrl, {poolSize: POOL_SIZE, native_parser: true}) // eslint-disable-line camelcase
+    .then(db => {
+      // const timer = new Helpers.Timer();
+
+      // const __exec = idx => {
+      //   return () => {
+      //     return new Promise((resolve, reject) => {
+      //       const t = new Helpers.Timer();
+      //       t.start();
+      //       db.collection('campaigns').find({}, {_id: 1}).toArray((err, result) => {
+      //         if (err) {
+      //           reject(err);
+      //           return;
+      //         }
+      //
+      //         console.log(`Campaigns[${cluster.worker.id}:${idx}]: ${t.lapTime}`);
+      //         resolve();
+      //       });
+      //     });
+      //   };
+      // };
+      //
+      // // timer.start();
+      // let tasks = [];
+      // for (let x = 0; x < POOL_SIZE; x++) {
+      //   // console.log(`Worker: ${cluster.worker.id}: ${timer.lapTime}`);
+      //   // db.collection('users').find({}, {_id: 1}).toArray((err, result) => console.log(`Users[${cluster.worker.id}:${x}]: ${timer.lapTime}`));
+      //   // db.collection('campaigns').find({}, {_id: 1})
+      //   //   .toArray((err, result) => console.log(`Campaigns[${cluster.worker.id}:${x}]: ${timer.lapTime}`));
+      //   tasks.push(__exec(x));
+      // }
+      //
+      // tasks.reduce((prev, curr) => {
+      //   return prev.then(curr);
+      // }, Promise.resolve());
+
+      return db;
     });
-  });
 };
 
 /* ********************************************************************************
@@ -152,7 +186,9 @@ const __initWorker = () => {
   app.use(express.static(`${Config.appDataPath}/public`));
 
   return __nativeMongoConnect()
-    .then(() => {
+    .then(db => {
+      Model.init(db);
+
       let tasks = [
         Routes.init(app),
         __systemInstall()
@@ -173,7 +209,7 @@ const __initWorker = () => {
 const __initMaster = () => {
   const isPrimary = Config.rest.app === 'primary';
   if (isPrimary) {
-    Logging.logDebug(`Primary Master REST`);
+    Logging.logVerbose(`Primary Master REST`);
   }
 
   __spawnWorkers();
