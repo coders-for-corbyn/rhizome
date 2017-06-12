@@ -205,7 +205,7 @@ schema.statics.add = body => {
  * @return {Promise} - resolves to an array of Apps (native Mongoose objects)
  */
 schema.statics.getAll = () => {
-  Logging.log(`getAll: ${Model.authApp._id}`, Logging.Constants.LogLevel.DEBUG);
+  Logging.logSilly(`getAll: ${Model.authApp._id}`);
   return ModelDef.find({_app: Model.authApp._id});
 };
 
