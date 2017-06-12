@@ -18,7 +18,7 @@ const Logging = require('./logging');
 /**
  *
  */
-const db = mongoose.connect(`mongodb://${Config.mongoDb.url}/${Config.app.code}-${Config.env}`);
+const db = mongoose.connect(`mongodb://${Config.mongoDb.url}/${Config.app.code}-${Config.env}`, {poolSize: 10});
 db.connection.on('connected', () => {
   Bootstrap
     .rest()
