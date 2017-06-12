@@ -26,8 +26,6 @@ const Logging = require('./logging');
  *
  **********************************************************************************/
 const processes = os.cpus().length;
-const nrp = new NRP(Config.redis);
-const emitter = sioEmitter(Config.redis);
 const _workers = [];
 
 /* ********************************************************************************
@@ -60,7 +58,6 @@ const __indexFromIP = (ip, spread) => {
 
 const __initWorker = Express => {
   const app = new Express();
-
   const server = app.listen(0, 'localhost');
   const io = sio(server);
   io.origins('*:*');
@@ -82,6 +79,9 @@ const __initWorker = Express => {
  *
  **********************************************************************************/
 const __initMaster = express => {
+  const emitter = sioEmitter(Config.redis);
+  const nrp = new NRP(Config.redis);
+
   const isPrimary = Config.sio.app === 'primary';
   if (isPrimary) {
     Logging.logDebug(`Primary Master`);
